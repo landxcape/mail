@@ -38,6 +38,7 @@ function load_mailbox(mailbox) {
   fetch(`/emails/${mailbox}`)
     .then(response => response.json())
     .then(emails => {
+      console.log(emails);
       emails.forEach(email => {
         var emails_container = document.createElement('div');
         var email_sender = document.createElement('div');
@@ -62,6 +63,7 @@ function load_mailbox(mailbox) {
         emails_container.appendChild(email_sender);
         emails_container.appendChild(email_subject);
         emails_container.appendChild(email_timestamp);
+        emails_container.style.background = email.read ? 'grey' : 'white';
         emails_view.appendChild(emails_container);
       });
     });
