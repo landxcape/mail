@@ -110,13 +110,18 @@ function view_email(email_id) {
   const view_timestamp = document.querySelector('#view-timestamp');
   const view_body = document.querySelector('#view-body');
   const button_archive = document.querySelector('#email-archive');
+  const button_reply = document.querySelector('#email-reply');
 
   let email_archive;
+  let email_content;
 
   fetch(`/emails/${email_id}`)
     .then(response => response.json())
     .then(email => {
-      button_archive.style.display = email.sender === document.querySelector('h2').innerText ? 'none' : 'block';
+      email_content = email;
+      let button_show = email.sender === document.querySelector('h2').innerText ? 'none' : 'block';
+      button_archive.style.display = button_show;
+      button_reply.style.display = button_show;
 
       view_from.innerHTML = email.sender;
       while (view_to.firstChild) {
@@ -130,7 +135,8 @@ function view_email(email_id) {
       });
       view_subject.innerHTML = email.subject;
       view_timestamp.innerHTML = email.timestamp;
-      view_body.innerHTML = email.body;
+      view_body.innerHTML = email.body.replace(/\n/g, '<br>');
+
 
       email_archive = email.archived;
       button_archive.innerHTML = email_archive ? 'Unarchive' : 'Archive';
@@ -153,7 +159,18 @@ function view_email(email_id) {
       () => load_mailbox('inbox')
     )
   };
-  // document.querySelector('#email-reply').onsubmit = (email_id) => archive_email(email_id);
+
+  button_reply.onclick = () => {
+    compose_email();
+    let sender_string = email_content.sender;
+    let subject_string = email_content.subject;
+    let body_string = `\n\n\nOn ${email_content.timestamp} ${sender_string} wrote:\n${email_content.body}\n\n\n`
+
+    document.querySelector('#compose-recipients').value = sender_string;
+    document.querySelector('#compose-subject').value = subject_string.includes('Re:') ? subject_string : `Re: ${subject_string}`;
+    document.querySelector('#compose-body').value = body_string;
+
+  };
 
   return false;
 }
