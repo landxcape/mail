@@ -41,7 +41,6 @@ function load_mailbox(mailbox) {
   fetch(`/emails/${mailbox}`)
     .then(response => response.json())
     .then(emails => {
-      console.log(emails);
       emails.forEach(email => {
         const emails_link = document.createElement('a');
         const emails_container = document.createElement('div');
@@ -105,14 +104,19 @@ function view_email(email_id) {
   document.querySelector('#compose-view').style.display = 'none';
   document.querySelector('#read-view').style.display = 'block';
 
+  const view_from = document.querySelector('#view-from');
+  const view_to = document.querySelector('#view-to');
+  const view_subject = document.querySelector('#view-subject');
+  const view_timestamp = document.querySelector('#view-timestamp');
+  const view_body = document.querySelector('#view-body');
+  const button_archive = document.querySelector('#email-archive');
+
+  let email_archive;
+
   fetch(`/emails/${email_id}`)
     .then(response => response.json())
     .then(email => {
-      const view_from = document.querySelector('#view-from');
-      const view_to = document.querySelector('#view-to');
-      const view_subject = document.querySelector('#view-subject');
-      const view_timestamp = document.querySelector('#view-timestamp');
-      const view_body = document.querySelector('#view-body');
+      button_archive.style.display = email.sender === document.querySelector('h2').innerText ? 'none' : 'block';
 
       view_from.innerHTML = email.sender;
       while (view_to.firstChild) {
@@ -127,12 +131,29 @@ function view_email(email_id) {
       view_subject.innerHTML = email.subject;
       view_timestamp.innerHTML = email.timestamp;
       view_body.innerHTML = email.body;
+
+      email_archive = email.archived;
+      button_archive.innerHTML = email_archive ? 'Unarchive' : 'Archive';
     });
+
   fetch(`/emails/${email_id}`, {
     method: 'PUT',
     body: JSON.stringify({
       read: true
     })
   });
+
+  button_archive.onclick = () => {
+    fetch(`/emails/${email_id}`, {
+      method: 'PUT',
+      body: JSON.stringify({
+        archived: !email_archive
+      })
+    }).then(
+      () => load_mailbox('inbox')
+    )
+  };
+  // document.querySelector('#email-reply').onsubmit = (email_id) => archive_email(email_id);
+
   return false;
 }
