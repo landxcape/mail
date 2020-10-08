@@ -82,7 +82,10 @@ function send_email() {
   const compose_subject = document.querySelector('#compose-subject');
   const compose_body = document.querySelector('#compose-body');
 
+  const csrftoken = getCookie('csrftoken');
+
   fetch('/emails', {
+    headers: { 'X-CSRFToken': csrftoken },
     method: 'POST',
     body: JSON.stringify({
       recipients: compose_recipients.value,
@@ -111,6 +114,8 @@ function view_email(email_id) {
   const view_body = document.querySelector('#view-body');
   const button_archive = document.querySelector('#email-archive');
   const button_reply = document.querySelector('#email-reply');
+
+  const csrftoken = getCookie('csrftoken');
 
   let email_archive;
   let email_content;
@@ -143,6 +148,7 @@ function view_email(email_id) {
     });
 
   fetch(`/emails/${email_id}`, {
+    headers: { 'X-CSRFToken': csrftoken },
     method: 'PUT',
     body: JSON.stringify({
       read: true
@@ -151,6 +157,7 @@ function view_email(email_id) {
 
   button_archive.onclick = () => {
     fetch(`/emails/${email_id}`, {
+      headers: { 'X-CSRFToken': csrftoken },
       method: 'PUT',
       body: JSON.stringify({
         archived: !email_archive
@@ -173,4 +180,19 @@ function view_email(email_id) {
   };
 
   return false;
+}
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
 }

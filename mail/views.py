@@ -5,7 +5,6 @@ from django.db import IntegrityError
 from django.http import JsonResponse
 from django.shortcuts import HttpResponse, HttpResponseRedirect, render
 from django.urls import reverse
-from django.views.decorators.csrf import csrf_exempt
 
 from .models import User, Email
 
@@ -21,7 +20,6 @@ def index(request):
         return HttpResponseRedirect(reverse("login"))
 
 
-@csrf_exempt
 @login_required
 def compose(request):
 
@@ -96,7 +94,6 @@ def mailbox(request, mailbox):
     return JsonResponse([email.serialize() for email in emails], safe=False)
 
 
-@csrf_exempt
 @login_required
 def email(request, email_id):
 
